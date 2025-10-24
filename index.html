@@ -1,119 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Memorize! Flashcards</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-        #modal {
-            display: none;
-            position: fixed;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, -20%);
-            background-color: #fff;
-            border: 2px solid #333;
-            padding: 20px;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        #modal button {
-            margin: 5px;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.3);
-            z-index: 500;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Memorize! Flashcards</title>
+<style>
+body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+#modal {
+    display: none;
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -20%);
+    background-color: #fff;
+    border: 2px solid #333;
+    padding: 20px;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+#modal button { margin: 5px; padding: 10px 20px; font-size: 16px; }
+#overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.3);
+    z-index: 500;
+}
+</style>
 </head>
 <body>
-    <h1>Memorize! Flashcards</h1>
-    <button id="startBtn">Start Quiz</button>
+<h1>Memorize! Flashcards</h1>
+<button id="startBtn">Start Quiz</button>
 
-    <div id="overlay"></div>
-    <div id="modal">
-        <h2 id="question"></h2>
-        <div id="choices"></div>
-    </div>
+<div id="overlay"></div>
+<div id="modal">
+    <h2 id="question"></h2>
+    <div id="choices"></div>
+</div>
 
-    <script>
-        const flashcards = [
-            {
-                question: "Capital of France?",
-                choices: ["Paris", "London", "Berlin", "Rome"],
-                answer: "Paris"
-            },
-            {
-                question: "Largest planet?",
-                choices: ["Mars", "Earth", "Jupiter", "Venus"],
-                answer: "Jupiter"
-            },
-            {
-                question: "2 + 2?",
-                choices: ["3", "4", "5", "6"],
-                answer: "4"
-            },
-            {
-                question: "Python creator?",
-                choices: ["Guido van Rossum", "Linus Torvalds", "Bill Gates", "Steve Jobs"],
-                answer: "Guido van Rossum"
-            }
-        ];
+<script>
+const flashcards = [
+    {
+        question: "Capital of France?",
+        choices: ["Paris", "London", "Berlin", "Rome"],
+        answer: "Paris"
+    },
+    {
+        question: "Largest planet?",
+        choices: ["Mars", "Earth", "Jupiter", "Venus"],
+        answer: "Jupiter"
+    },
+    {
+        question: "2 + 2?",
+        choices: ["3", "4", "5", "6"],
+        answer: "4"
+    },
+    {
+        question: "Python creator?",
+        choices: ["Guido van Rossum", "Linus Torvalds", "Bill Gates", "Steve Jobs"],
+        answer: "Guido van Rossum"
+    }
+];
 
-        const intervalSeconds = 30;
-        let intervalId = null;
+const intervalSeconds = 30;
+let intervalId = null;
 
-        function showFlashcard() {
-            const card = flashcards[Math.floor(Math.random() * flashcards.length)];
-            
-            document.getElementById("question").textContent = card.question;
+function showFlashcard() {
+    const card = flashcards[Math.floor(Math.random() * flashcards.length)];
 
-            const choicesDiv = document.getElementById("choices");
-            choicesDiv.innerHTML = "";
+    document.getElementById("question").textContent = card.question;
+    const choicesDiv = document.getElementById("choices");
+    choicesDiv.innerHTML = "";
 
-            card.choices.forEach(choice => {
-                const btn = document.createElement("button");
-                btn.textContent = choice;
-                btn.onclick = () => {
-                    alert(choice === card.answer ? "✅ Correct!" : `❌ Wrong! Answer: ${card.answer}`);
-                    hideModal();
-                };
-                choicesDiv.appendChild(btn);
-            });
+    card.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.textContent = choice;
+        btn.onclick = () => {
+            alert(choice === card.answer ? "✅ Correct!" : `❌ Wrong! Answer: ${card.answer}`);
+            hideModal();
+        };
+        choicesDiv.appendChild(btn);
+    });
 
-            document.getElementById("overlay").style.display = "block";
-            document.getElementById("modal").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("modal").style.display = "block";
 
-            // Optional: also show system notification
-            if (Notification.permission === "granted") {
-                new Notification("Memorize! Quiz", { body: card.question });
-            }
-        }
+    // Optional system notification
+    if (Notification.permission === "granted") {
+        new Notification("Memorize! Quiz", { body: card.question });
+    }
+}
 
-        function hideModal() {
-            document.getElementById("modal").style.display = "none";
-            document.getElementById("overlay").style.display = "none";
-        }
+function hideModal() {
+    document.getElementById("modal").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+}
 
-        document.getElementById("startBtn").addEventListener("click", () => {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted" || permission === "default") {
-                    showFlashcard(); // first flashcard immediately
-                    intervalId = setInterval(showFlashcard, intervalSeconds * 1000);
-                    alert("Quiz started! A flashcard will pop up every 30 seconds.");
-                } else {
-                    alert("Notifications blocked! The quiz will still work inside the page.");
-                    showFlashcard();
-                    intervalId = setInterval(showFlashcard, intervalSeconds * 1000);
-                }
-            });
-        });
-    </script>
+document.getElementById("startBtn").addEventListener("click", () => {
+    Notification.requestPermission().then(permission => {
+        showFlashcard();
+        intervalId = setInterval(showFlashcard, intervalSeconds * 1000);
+    });
+});
+</script>
 </body>
 </html>
