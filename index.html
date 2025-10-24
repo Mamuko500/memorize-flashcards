@@ -5,14 +5,39 @@
     <title>Memorize! Flashcards</title>
     <style>
         body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-        .flashcard { margin-top: 20px; }
-        button { margin: 5px; padding: 10px 20px; font-size: 16px; }
+        #modal {
+            display: none;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -20%);
+            background-color: #fff;
+            border: 2px solid #333;
+            padding: 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        #modal button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.3);
+            z-index: 500;
+        }
     </style>
 </head>
 <body>
     <h1>Memorize! Flashcards</h1>
     <button id="startBtn">Start Quiz</button>
-    <div class="flashcard" id="flashcard" style="display:none;">
+
+    <div id="overlay"></div>
+    <div id="modal">
         <h2 id="question"></h2>
         <div id="choices"></div>
     </div>
@@ -46,7 +71,7 @@
 
         function showFlashcard() {
             const card = flashcards[Math.floor(Math.random() * flashcards.length)];
-            document.getElementById("flashcard").style.display = "block";
+            
             document.getElementById("question").textContent = card.question;
 
             const choicesDiv = document.getElementById("choices");
@@ -56,29 +81,36 @@
                 const btn = document.createElement("button");
                 btn.textContent = choice;
                 btn.onclick = () => {
-                    if (choice === card.answer) {
-                        alert("✅ Correct!");
-                    } else {
-                        alert(`❌ Wrong! Answer: ${card.answer}`);
-                    }
+                    alert(choice === card.answer ? "✅ Correct!" : `❌ Wrong! Answer: ${card.answer}`);
+                    hideModal();
                 };
                 choicesDiv.appendChild(btn);
             });
 
-            // Optional: system notification
+            document.getElementById("overlay").style.display = "block";
+            document.getElementById("modal").style.display = "block";
+
+            // Optional: also show system notification
             if (Notification.permission === "granted") {
                 new Notification("Memorize! Quiz", { body: card.question });
             }
         }
 
+        function hideModal() {
+            document.getElementById("modal").style.display = "none";
+            document.getElementById("overlay").style.display = "none";
+        }
+
         document.getElementById("startBtn").addEventListener("click", () => {
             Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    showFlashcard(); // first one immediately
+                if (permission === "granted" || permission === "default") {
+                    showFlashcard(); // first flashcard immediately
                     intervalId = setInterval(showFlashcard, intervalSeconds * 1000);
-                    alert("Quiz started! A flashcard will appear every 30 seconds.");
+                    alert("Quiz started! A flashcard will pop up every 30 seconds.");
                 } else {
-                    alert("Please allow notifications to get reminders.");
+                    alert("Notifications blocked! The quiz will still work inside the page.");
+                    showFlashcard();
+                    intervalId = setInterval(showFlashcard, intervalSeconds * 1000);
                 }
             });
         });
