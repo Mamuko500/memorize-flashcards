@@ -3,39 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <title>Memorize! Flashcards</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        .flashcard { margin-top: 20px; }
+        button { margin: 5px; padding: 10px 20px; font-size: 16px; }
+    </style>
 </head>
 <body>
     <h1>Memorize! Flashcards</h1>
-    <p>Click the button below to start receiving notifications every 30 seconds.</p>
-    <button id="startBtn">Start Notifications</button>
+    <button id="startBtn">Start Quiz</button>
+    <div class="flashcard" id="flashcard" style="display:none;">
+        <h2 id="question"></h2>
+        <div id="choices"></div>
+    </div>
 
     <script>
         const flashcards = [
-            "Capital of France? : Paris",
-            "2 + 2? : 4",
-            "Largest planet? : Jupiter",
-            "Python creator? : Guido van Rossum"
+            {
+                question: "Capital of France?",
+                choices: ["Paris", "London", "Berlin", "Rome"],
+                answer: "Paris"
+            },
+            {
+                question: "Largest planet?",
+                choices: ["Mars", "Earth", "Jupiter", "Venus"],
+                answer: "Jupiter"
+            },
+            {
+                question: "2 + 2?",
+                choices: ["3", "4", "5", "6"],
+                answer: "4"
+            },
+            {
+                question: "Python creator?",
+                choices: ["Guido van Rossum", "Linus Torvalds", "Bill Gates", "Steve Jobs"],
+                answer: "Guido van Rossum"
+            }
         ];
 
         const intervalSeconds = 30;
         let intervalId = null;
 
-        function sendNotification() {
-            const randomCard = flashcards[Math.floor(Math.random() * flashcards.length)];
-            new Notification("Memorize! Reminder", {
-                body: randomCard,
-                icon: "https://upload.wikimedia.org/wikipedia/commons/4/44/Plain-circle-red.svg"
+        function showFlashcard() {
+            const card = flashcards[Math.floor(Math.random() * flashcards.length)];
+            document.getElementById("flashcard").style.display = "block";
+            document.getElementById("question").textContent = card.question;
+
+            const choicesDiv = document.getElementById("choices");
+            choicesDiv.innerHTML = "";
+
+            card.choices.forEach(choice => {
+                const btn = document.createElement("button");
+                btn.textContent = choice;
+                btn.onclick = () => {
+                    if (choice === card.answer) {
+                        alert("✅ Correct!");
+                    } else {
+                        alert(`❌ Wrong! Answer: ${card.answer}`);
+                    }
+                };
+                choicesDiv.appendChild(btn);
             });
+
+            // Optional: system notification
+            if (Notification.permission === "granted") {
+                new Notification("Memorize! Quiz", { body: card.question });
+            }
         }
 
         document.getElementById("startBtn").addEventListener("click", () => {
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") {
-                    sendNotification(); // first one immediately
-                    intervalId = setInterval(sendNotification, intervalSeconds * 1000);
-                    alert("Notifications started! You will get one every 30 seconds.");
+                    showFlashcard(); // first one immediately
+                    intervalId = setInterval(showFlashcard, intervalSeconds * 1000);
+                    alert("Quiz started! A flashcard will appear every 30 seconds.");
                 } else {
-                    alert("Notifications blocked! Please allow them in your browser.");
+                    alert("Please allow notifications to get reminders.");
                 }
             });
         });
