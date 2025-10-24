@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Memorize! Online Flashcards</title>
+</head>
+<body>
+    <h1>Memorize! Online Flashcards</h1>
+    <p>Click the button below to start receiving flashcard notifications every 30 seconds.</p>
+    <button id="startBtn">Start Notifications</button>
+
+    <script>
+        // Your flashcards
+        const flashcards = [
+            "Capital of France? : Paris",
+            "2 + 2? : 4",
+            "Largest planet? : Jupiter",
+            "Python creator? : Guido van Rossum"
+        ];
+
+        const intervalSeconds = 30;
+        let intervalId = null;
+
+        // Function to send a notification
+        function sendNotification() {
+            const randomCard = flashcards[Math.floor(Math.random() * flashcards.length)];
+            new Notification("Memorize! Reminder", {
+                body: randomCard,
+                icon: "https://upload.wikimedia.org/wikipedia/commons/4/44/Plain-circle-red.svg"
+            });
+        }
+
+        // Start notifications on button click
+        document.getElementById("startBtn").addEventListener("click", () => {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    sendNotification(); // Send first immediately
+                    intervalId = setInterval(sendNotification, intervalSeconds * 1000);
+                    alert("Notifications started! You will get one every 30 seconds.");
+                } else {
+                    alert("Please allow notifications to use this feature!");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
